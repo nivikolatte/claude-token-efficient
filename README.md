@@ -1,6 +1,7 @@
 # claude-token-efficient
 
-> One file. Drop it in your project. Cut Claude output tokens by ~63%. No code changes required.
+> One file. Drop it in your project. Cuts Claude output verbosity by ~63%. No code changes required.
+> Note: most Claude costs come from input tokens, not output. This file targets output behavior - sycophancy, verbosity, formatting noise. It won't fix your biggest bill but it will fix your most annoying responses.
 
 ---
 
