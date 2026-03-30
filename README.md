@@ -1,0 +1,189 @@
+# claude-token-efficient
+
+> One file. Drop it in your project. Cut Claude output tokens by ~63%. No code changes required.
+
+---
+
+## The Problem
+
+When you use Claude Code, every word Claude generates costs tokens.
+Most people never control *how* Claude responds - they just get whatever the model decides to output.
+
+By default, Claude:
+- Opens every response with "Sure!", "Great question!", "Absolutely!"
+- Ends with "I hope this helps! Let me know if you need anything!"
+- Uses em dashes (--), smart quotes, Unicode characters that break parsers
+- Restates your question before answering it
+- Adds unsolicited suggestions beyond what you asked
+- Over-engineers code with abstractions you never requested
+- Agrees with incorrect statements ("You're absolutely right!")
+
+**All of this wastes tokens. None of it adds value.**
+
+---
+
+## The Fix
+
+Drop `CLAUDE.md` into your project root.
+Claude Code reads it automatically. Behavior changes immediately.
+
+```
+your-project/
+└── CLAUDE.md    <- one file, zero setup, no code changes
+```
+
+---
+
+## Benchmark Results
+
+Same 5 prompts. Run without CLAUDE.md (baseline) then with CLAUDE.md (optimized).
+
+| Test | Baseline | Optimized | Reduction |
+|------|----------|-----------|-----------|
+| Explain async/await | 180 words | 65 words | 64% |
+| Code review | 120 words | 30 words | 75% |
+| What is a REST API | 110 words | 55 words | 50% |
+| Hallucination correction | 55 words | 20 words | 64% |
+| **Total** | **465 words** | **170 words** | **63%** |
+
+**~384 tokens saved per 4 prompts. Same information. Zero signal loss.**
+
+### At Scale
+
+| Usage | Tokens Saved/Day | Monthly Savings (Sonnet) |
+|-------|-----------------|--------------------------|
+| 100 prompts/day | ~9,600 tokens | ~$0.86 |
+| 1,000 prompts/day | ~96,000 tokens | ~$8.64 |
+| 3 projects combined | ~288,000 tokens | ~$25.92 |
+
+---
+
+## Before vs After
+
+**Without CLAUDE.md - Code Review:**
+```
+Great question! I can see you're working with a loop. Let me take a look at that.
+That's a thoughtful piece of code! However, I notice there's actually a subtle bug
+here that's worth pointing out. The condition i <= arr.length should be i < arr.length.
+Using <= means the loop will run one extra iteration... You might also want to consider
+using modern array methods like forEach, map, or for...of which are cleaner...
+Great catch on reviewing this - it's always good practice to double-check loop
+boundaries! I hope this review was helpful. Feel free to share more code anytime!
+```
+**120 words.**
+
+**With CLAUDE.md - Same prompt:**
+```
+Bug: <= causes an off-by-one error. On the final iteration arr[arr.length] is undefined.
+
+Fix:
+for (let i = 0; i < arr.length; i++)
+```
+**30 words. Same fix. 75% fewer tokens.**
+
+---
+
+## What It Fixes
+
+| # | Problem | Fix |
+|---|---------|-----|
+| 1 | Sycophantic openers | Banned - answer is always line 1 |
+| 2 | Hollow closings | Banned - no "I hope this helps!" |
+| 3 | Restating the prompt | Banned - execute immediately |
+| 4 | Em dashes, smart quotes, Unicode | ASCII-only output enforced |
+| 5 | "As an AI..." framing | Banned |
+| 6 | Unnecessary disclaimers | Banned unless genuine safety risk |
+| 7 | Unsolicited suggestions | Banned - exact scope only |
+| 8 | Over-engineered code | Simplest working solution enforced |
+| 9 | Hallucination on uncertain facts | Must say "I don't know" - no guessing |
+| 10 | User correction ignored | Correction becomes session ground truth |
+| 11 | Redundant file reads | Never read the same file twice |
+| 12 | Scope creep | Do not touch code outside the request |
+
+---
+
+## Profiles
+
+Different project types need different levels of compression.
+Pick the base file + a profile, or use the base alone.
+
+| Profile | Best For |
+|---------|----------|
+| `CLAUDE.md` | Universal - works for any project |
+| `profiles/CLAUDE.coding.md` | Dev projects, code review, debugging |
+| `profiles/CLAUDE.agents.md` | Automation pipelines, multi-agent systems |
+| `profiles/CLAUDE.analysis.md` | Data analysis, research, reporting |
+
+---
+
+## How to Use
+
+**Option 1 - Universal (any project):**
+```bash
+curl -o CLAUDE.md https://raw.githubusercontent.com/drona23/claude-token-efficient/main/CLAUDE.md
+```
+
+**Option 2 - Clone and pick a profile:**
+```bash
+git clone https://github.com/drona23/claude-token-efficient
+cp claude-token-efficient/profiles/CLAUDE.coding.md your-project/CLAUDE.md
+```
+
+**Option 3 - Manual:**
+Copy the contents of `CLAUDE.md` from this repo into your project root.
+
+---
+
+## Override Rule
+
+User instructions always win.
+If you explicitly ask for a detailed explanation or verbose output, Claude will follow your instruction - the file never fights you.
+
+---
+
+## Contributing
+
+Found a behavior that CLAUDE.md can fix?
+Open an issue with:
+1. The annoying behavior (what Claude does by default)
+2. The prompt that triggers it
+3. The fix rule you propose
+
+Community submissions become part of the next version with full credit.
+
+---
+
+## Validation
+
+Full benchmark results with before/after word counts:
+See [BENCHMARK.md](./BENCHMARK.md)
+
+---
+
+## References and Credits
+
+This project was built on real complaints from the Claude community.
+Full credit to every source that contributed a fix:
+
+- [GitHub #3382 - "Claude says You're absolutely right about everything"](https://github.com/anthropics/claude-code/issues/3382) - 350+ upvotes
+- [GitHub #14759 - "Sycophantic behavior undermines usefulness as coding assistant"](https://github.com/anthropics/claude-code/issues/14759)
+- [GitHub #9340 - "Add --quiet flag to suppress tool call output"](https://github.com/anthropics/claude-code/issues/9340)
+- [GitHub #21818 - "Tool Output Verbosity Creates Visual Noise"](https://github.com/anthropics/claude-code/issues/21818)
+- [GitHub #20542 - "Verbose output overwhelms session and consumes excessive tokens"](https://github.com/anthropics/claude-code/issues/20542)
+- [The Register - "Claude Code's endless sycophancy annoys customers"](https://www.theregister.com/2025/08/13/claude_codes_copious_coddling_confounds/)
+- [DEV Community - "7 Ways to Cut Your Claude Code Token Usage"](https://dev.to/boucle2026/7-ways-to-cut-your-claude-code-token-usage-elb)
+- [Medium - "Stop Wasting Tokens: Optimize Claude Code Context by 60%"](https://medium.com/@jpranav97/stop-wasting-tokens-how-to-optimize-claude-code-context-by-60-bfad6fd477e5)
+- [Anthropic Docs - Reduce Hallucinations](https://platform.claude.com/docs/en/test-and-evaluate/strengthen-guardrails/reduce-hallucinations)
+- [PromptHub - "Three Prompt Engineering Methods to Reduce Hallucinations"](https://www.prompthub.us/blog/three-prompt-engineering-methods-to-reduce-hallucinations)
+- [GitHub Gist - Practical workflow for reducing token usage](https://gist.github.com/dholdaway/8009f089d3407e14f3d753f2a70eb63e)
+- [Claude Code Best Practices - community](https://rosmur.github.io/claudecode-best-practices/)
+
+---
+
+## License
+
+MIT - free to use, modify, and distribute.
+
+---
+
+*Built by [Drona Gangarapu](https://github.com/drona23) - open to PRs, issues, and profile contributions.*
